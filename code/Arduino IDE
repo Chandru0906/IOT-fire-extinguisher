@@ -1,0 +1,98 @@
+
+#include <Servo.h>
+
+// Pin definitions
+const int mq2Pin = A0;
+const int flamePin = 2;
+const int relayPin = 3;
+const int servoPin = 9;
+const int motorPin1 = 5;
+const int motorPin2 = 6;
+
+// Thresholds and constants
+const int gasThreshold = 500;  // Adjust based on calibration
+const int flameThreshold = 500;  // Adjust based on calibration
+const int moistureThreshold = 500;  // Simulated value, adjust as needed
+
+Servo myservo;
+int servoPosition = 0;
+
+void setup() {
+  Serial.begin(9600);
+  
+  pinMode(mq2Pin, INPUT);
+  pinMode(flamePin, INPUT);
+  pinMode(relayPin, OUTPUT);
+  pinMode(motorPin1, OUTPUT);
+  pinMode(motorPin2, OUTPUT);
+  
+  myservo.attach(servoPin);
+  
+  // Initially turn off pump and fan
+  digitalWrite(relayPin, LOW);
+  digitalWrite(motorPin1, LOW);
+  digitalWrite(motorPin2, LOW);
+}
+
+void loop() {
+  // Read sensor values
+  int gasValue = analogRead(mq2Pin);
+  int flameValue = analogRead(flamePin);
+  int moistureValue = analogRead(A1);  // Simulated moisture sensor
+  
+  // Process environmental data
+  processEnvironmentalData(gasValue, flameValue, moistureValue);
+  
+  // Adaptive watering control
+  controlWatering(moistureValue);
+  
+  // Microclimate management
+  manageMicroclimate(gasValue, flameValue);
+  
+  // Log data (simulated)
+  logData(gasValue, flameValue, moistureValue);
+  
+  delay(1000);  // Adjust based on desired sampling rate
+}
+
+void processEnvironmentalData(int gas, int flame, int moisture) {
+  // Implement data processing and decision-making logic
+}
+
+void controlWatering(int moisture) {
+  if (moisture < moistureThreshold) {
+    digitalWrite(relayPin, HIGH);  // Turn on pump
+    // Adjust servo for water direction
+    myservo.write(calculateServoPosition());
+    delay(5000);  // Water for 5 seconds
+    digitalWrite(relayPin, LOW);  // Turn off pump
+  }
+}
+
+void manageMicroclimate(int gas, int flame) {
+  if (gas > gasThreshold || flame > flameThreshold) {
+    // Activate ventilation
+    digitalWrite(motorPin1, HIGH);
+    digitalWrite(motorPin2, LOW);
+    Serial.println("Gas detected! Turning on motor.");
+  } else {
+    // Turn off ventilation
+    digitalWrite(motorPin1, LOW);
+    digitalWrite(motorPin2, LOW);
+  }
+}
+
+int calculateServoPosition() {
+  // Implement logic to determine optimal servo position
+  return 90;  // Example: middle position
+}
+
+void logData(int gas, int flame, int moisture) {
+  // Simulate data logging
+  Serial.print("Gas: ");
+  Serial.print(gas);
+  Serial.print(", Flame: ");
+  Serial.print(flame);
+  Serial.print(", Moisture: ");
+  Serial.println(moisture);
+}
